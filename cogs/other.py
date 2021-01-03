@@ -75,49 +75,74 @@ class other(commands.Cog, name='other'):
             embed=discord.Embed(description="The bot needs to have a higher role for you to go into AFK.", color=colour())
             await ctx.send(embed=embed)
     
-    @commands.command(aliases = ['create tag', 'create'])
-    async def create_tag(self, ctx, * , name):
-        with open('tags.json') as f:
-            tags = json.load(f)
-        if name in tags.keys():
-            await ctx.send("There's a tag with that name!")
-        else:
-            await ctx.send("What's the content of this tag? ||send message||")
-            description = await self.bot.wait_for('message', check=lambda message: message.author == ctx.author)
-            tags[name] = f"{str(description.content)}"
-            with open('tags.json', 'w') as f:
-                json.dump(tags, f, indent = 4)
-            await ctx.send(f"Done! Do `!tag {name}` to see your tag.")
-    
-    @commands.command()
-    async def tag(self, ctx, *, tag):
-        with open('tags.json') as f:
-            tags = json.load(f)
-        if tag not in tags.keys():
-            await ctx.send("Tag not found!")
-        else:
-            await ctx.send(tags[tag])
 
-    @commands.command(aliases = ['edit'])
-    async def edit_tag(self, ctx, *, tag):
-        with open('tags.json') as f:
+    @commands.group(invoke_without_command=True)
+    async def tag(self, ctx, *, tag: str = None):
+        tag = tag.lower()
+        with open('cogs/tags.json') as f:
             tags = json.load(f)
-        if tag not in tags.keys():
-            await ctx.send("The tag you're trying to edit is not found!")
+        if tag is None:
+            await ctx.message.delete(delay=10.0)
+            message = await ctx.send('You need to pass a tag.')
+            return await message.delete(delay=10.0)
         else:
-            await ctx.send('What is the new description of this tag?')
-            description = await self.bot.wait_for('message', check=lambda message: message.author == ctx.author)
-            tags[str(tag)] = str(description.content)
-            with open('tags.json', 'w') as f:
-                json.dump(tags, f, indent = 4)
-            await ctx.send("Tag edited!")
-    
-    @commands.command()
-    async def delete_tag(self, ctx, *, arg):
-        allow_users = []
-        if ctx.author.id in allow_users:
-            with open('tags.json') as f:
+            if tag not in tags.keys():
+                await ctx.message.delete(delay=10.0)
+                message = await ctx.send('Could not find a tag with that name.')
+                return await message.delete(delay=10.0)
+            else:
+                await ctx.send(tags[tag])
+
+    @tag.command()
+    async def create(self, ctx, * , name: str = None):
+        if name is None:
+            await ctx.send("The title of the tag you're trying to create is missing.")
+        else:
+            with open('cogs/tags.json') as f:
                 tags = json.load(f)
+            if name.lower() in tags.keys():
+                await ctx.send("There's a tag with that name!")
+            else:
+                await ctx.send("Send the description of the tag.")
+                description = await self.bot.wait_for('message', check=lambda message: message.author == ctx.author)
+                tags[name.lower()] = description.content
+                with open('cogs/tags.json', 'w') as f:
+                    json.dump(tags, f, indent = 4)
+                await ctx.send(f"Done! Your tag has been created.")
+
+    @tag.command()
+    async def edit(self, ctx, *, tag: str == None):
+        if tag is None:
+            await ctx.send('Please specify the tag you want to edit.')
+        else:
+            with open('cogs/tags.json') as f:
+                tags = json.load(f)
+            if tag.lower() not in tags.keys():
+                await ctx.send("The tag you're trying to edit isn't found.")
+            else:
+                await ctx.send('What is the new description of this tag?')
+                description = await self.bot.wait_for('message', check=lambda message: message.author == ctx.author)
+                tags[tag.lower()] = description.content
+                with open('cogs/tags.json', 'w') as f:
+                    json.dump(tags, f, indent = 4)
+                await ctx.send("Tag edited! Your tag has been edited.")
+    
+    @tag.command()
+    async def delete(self, ctx, *, tag: str == None):
+        if tag is None:
+            await ctx.send('Please specify the tag you want to delete.')
+        else:
+            with open('cogs/tags.json') as f:
+                tags = json.load(f)
+            tag = tag.lower()
+            if tag not in tags:
+                await ctx.send("The tag that you're trying to delete wasn't found")
+            else:
+                tags.pop(tag)
+                await ctx.send("Tag deleted! Your tag has been deleted.")
+                with open('cogs/tags.json', 'w') as f:
+                    json.dump(tags, f, indent = 4)
+        ...
         ...
 
     """
@@ -239,9 +264,17 @@ class other(commands.Cog, name='other'):
                 bruh = await ctx.send(embed=embed)
                 for emoji in ('<:upvote:779913676525404160>', '<:downvote:779913676529729556>'):
                         await bruh.add_reaction(emoji)
+
+    @commands.command()
+    async def emoji(self, ctx, *, text: str = None):
+        if text is None:
+            await ctx.send("Please add the text you want me to convert to emojis.")
+        else:
+            text = text.lower()
+            emojis = {'a':'🇦 ', 'b': '🇧 ', 'c': '🇨 ', 'd': '🇩 ', 'e': '🇪 ', 'f': '🇫 ', 'g': '🇬 ', 'h': '🇭 ', 'i': '🇮 ', 'j': '🇯 ', 'k': '🇰 ', 'l': '🇱 ', 'm': '🇲 ', 'n': '🇳 ', 'o': '🇴 ', 'p': '🇵 ', 'q': '🇶 ', 'r': '🇷 ', 's': '🇸 ', 't': '🇹 ', 'u':'🇺 ', 'v': '🇻 ', 'w': '🇼 ', 'x':'🇽 ', 'y': '🇾 ', 'z': '🇿 ', ' ': '  ', '!': '❗'}
+            for i in emojis.keys():
+                text = text.replace(i, emojis[i])
+            await ctx.send(text)
+
 def setup(bot):
     bot.add_cog(other(bot))
-
-
-
-
