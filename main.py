@@ -36,10 +36,4 @@ cogs = [
 for cog in cogs:
     bot.load_extension(cog)
 
-
-@bot.command()
-async def say(ctx, *arg):
-    await ctx.send(str(arg))
-        
-
 bot.run(token)
