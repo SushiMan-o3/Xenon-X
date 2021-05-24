@@ -4,7 +4,7 @@ import os
 
 from config import token
 
-description = "A bot made by a dumbass!"
+description = "A bot made by a idiot!"
 
 intents = discord.Intents.default()
 intents.members = True 
