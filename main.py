@@ -2,14 +2,14 @@ from discord.ext import commands
 import discord
 import os
 
-from config import token
+from config import token, prefix
 
 description = "A bot made by a idiot!"
 
 intents = discord.Intents.default()
 intents.members = True 
 
-bot = commands.Bot(command_prefix='!', description=description, intents = intents)
+bot = commands.Bot(command_prefix=prefix, description=description, intents = intents)
 
 @bot.event
 async def on_ready():
