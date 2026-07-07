@@ -1,13 +1,15 @@
 from discord.ext import commands
 import discord
 import os
+import asyncio
 
 from config import token, prefix
 
 description = "A bot made by a idiot!"
 
 intents = discord.Intents.default()
-intents.members = True 
+intents.members = True
+intents.message_content = True
 
 bot = commands.Bot(command_prefix=prefix, description=description, intents = intents)
 
@@ -19,7 +21,7 @@ async def on_ready():
 async def on_command_error(ctx, error):
     error_logs = bot.get_channel(750703265783611484)
     await error_logs.send(f"```py\n{error}\n```")
- 
+
 os.environ["JISHAKU_NO_UNDERSCORE"] = "True"
 os.environ["JISHAKU_NO_DM_TRACEBACK"] = "True"
 os.environ["JISHAKU_HIDE"] = "True"
@@ -33,7 +35,10 @@ cogs = [
     #'cogs.moderation'
 ]
 
-for cog in cogs:
-    bot.load_extension(cog)
+async def main():
+    async with bot:
+        for cog in cogs:
+            await bot.load_extension(cog)
+        await bot.start(token)
 
-bot.run(token)
+asyncio.run(main())
